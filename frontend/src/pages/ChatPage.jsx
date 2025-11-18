@@ -153,37 +153,54 @@ function ChatPage() {
             <p>Ask Claude anything!</p>
           </div>
         ) : (
-          messages.map((msg, index) => (
-            <div key={index} className={`message ${msg.role}`}>
-              <div className="message-role">
-                {msg.role === 'user' ? 'You' : 'Claude'}
-              </div>
-              <div className="message-content">{msg.content}</div>
-
-              {/* Show thinking block if present */}
-              {msg.thinking && (
-                <div className="message-thinking">
-                  <div className="thinking-label">Extended Thinking:</div>
-                  <div className="message-content">{msg.thinking}</div>
+          <>
+            {messages.map((msg, index) => (
+              <div key={index} className={`message ${msg.role}`}>
+                <div className="message-role">
+                  {msg.role === 'user' ? 'You' : 'Claude'}
                 </div>
-              )}
+                <div className="message-content">{msg.content}</div>
 
-              <div className="message-timestamp">
-                {formatTimestamp(msg.createdAt)}
-              </div>
+                {/* Show thinking block if present */}
+                {msg.thinking && (
+                  <div className="message-thinking">
+                    <div className="thinking-label">Extended Thinking:</div>
+                    <div className="message-content">{msg.thinking}</div>
+                  </div>
+                )}
 
-              {/* Show token usage for assistant messages */}
-              {msg.tokenUsage && (
-                <div className="message-tokens">
-                  Tokens: {msg.tokenUsage.inputTokens} in, {msg.tokenUsage.outputTokens} out
-                  {msg.tokenUsage.cacheCreationTokens > 0 &&
-                    ` | Cache created: ${msg.tokenUsage.cacheCreationTokens}`}
-                  {msg.tokenUsage.cacheReadTokens > 0 &&
-                    ` | Cache read: ${msg.tokenUsage.cacheReadTokens}`}
+                <div className="message-timestamp">
+                  {formatTimestamp(msg.createdAt)}
                 </div>
-              )}
-            </div>
-          ))
+
+                {/* Show token usage for assistant messages */}
+                {msg.tokenUsage && (
+                  <div className="message-tokens">
+                    Tokens: {msg.tokenUsage.inputTokens} in, {msg.tokenUsage.outputTokens} out
+                    {msg.tokenUsage.cacheCreationTokens > 0 &&
+                      ` | Cache created: ${msg.tokenUsage.cacheCreationTokens}`}
+                    {msg.tokenUsage.cacheReadTokens > 0 &&
+                      ` | Cache read: ${msg.tokenUsage.cacheReadTokens}`}
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {/* Loading animation while waiting for response */}
+            {loading && (
+              <div className="message assistant loading-message">
+                <div className="message-role">Claude</div>
+                <div className="loading-animation">
+                  <div className="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <div className="loading-text">Thinking...</div>
+                </div>
+              </div>
+            )}
+          </>
         )}
         <div ref={messagesEndRef} />
       </div>

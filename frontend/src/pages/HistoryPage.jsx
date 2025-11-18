@@ -165,19 +165,8 @@ function HistoryPage() {
         <div className="conversation-list">
           {conversations.map((conv) => (
             <div key={conv.id} className="conversation-card">
-              <div className="conversation-header">
-                <div className="conversation-info">
-                  <div className="conversation-date">
-                    Started: {formatTimestamp(conv.createdAt)}
-                  </div>
-                  <div className="conversation-date">
-                    Last updated: {formatTimestamp(conv.updatedAt)}
-                  </div>
-                  <div className="conversation-stats">
-                    Messages: {conv.messages.length} | Total tokens: {conv.totalInputTokens + conv.totalOutputTokens}
-                  </div>
-                </div>
-
+              <div className="card-header">
+                <h3>Conversation #{conv.id}</h3>
                 <div className="conversation-actions">
                   <button
                     onClick={() => handleContinue(conv.id)}
@@ -200,23 +189,34 @@ function HistoryPage() {
                 </div>
               </div>
 
-              {/* Preview first few messages */}
-              <div className="conversation-preview">
-                {conv.messages.slice(0, 4).map((msg, index) => (
-                  <div key={index} className="preview-message">
-                    <div className="preview-role">
-                      {msg.role === 'user' ? 'You' : 'Claude'}:
-                    </div>
-                    <div className="preview-content">
-                      {msg.content.substring(0, 100)}
-                      {msg.content.length > 100 ? '...' : ''}
-                    </div>
+              <div className="card-body">
+                <div className="card-row">
+                  <div className="card-label">Started:</div>
+                  <div className="card-value">{formatTimestamp(conv.createdAt)}</div>
+                </div>
+                <div className="card-row">
+                  <div className="card-label">Last Updated:</div>
+                  <div className="card-value">{formatTimestamp(conv.updatedAt)}</div>
+                </div>
+                <div className="card-row">
+                  <div className="card-label">Messages:</div>
+                  <div className="card-value">{conv.messages.length}</div>
+                </div>
+                <div className="card-row">
+                  <div className="card-label">Total Tokens:</div>
+                  <div className="card-value">
+                    {conv.totalInputTokens + conv.totalOutputTokens}
+                    {' '}
+                    ({conv.totalInputTokens} in, {conv.totalOutputTokens} out)
                   </div>
-                ))}
-                {conv.messages.length > 4 && (
-                  <div className="preview-message">
-                    <div className="preview-content" style={{ fontStyle: 'italic' }}>
-                      ... and {conv.messages.length - 4} more messages
+                </div>
+                {(conv.totalCacheCreationTokens > 0 || conv.totalCacheReadTokens > 0) && (
+                  <div className="card-row">
+                    <div className="card-label">Cache:</div>
+                    <div className="card-value">
+                      {conv.totalCacheCreationTokens > 0 && `${conv.totalCacheCreationTokens} created`}
+                      {conv.totalCacheCreationTokens > 0 && conv.totalCacheReadTokens > 0 && ', '}
+                      {conv.totalCacheReadTokens > 0 && `${conv.totalCacheReadTokens} read`}
                     </div>
                   </div>
                 )}

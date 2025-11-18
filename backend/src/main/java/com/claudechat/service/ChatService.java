@@ -10,6 +10,8 @@ import com.claudechat.repository.MessageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,9 +71,12 @@ public class ChatService {
         }
 
         // Get the system prompt from context
-        String systemPrompt = contextRepository.findFirstByOrderByIdAsc()
+        String baseSystemPrompt = contextRepository.findFirstByOrderByIdAsc()
                 .map(Context::getSystemPrompt)
                 .orElse("");
+
+        // Add current timestamp to system prompt
+        String systemPrompt = buildSystemPromptWithTimestamp(baseSystemPrompt);
 
         // Call Claude API with system prompt
         ClaudeApiClient.ClaudeResponse claudeResponse = claudeApiClient.sendMessage(history, userMessage, systemPrompt);
@@ -135,5 +140,29 @@ public class ChatService {
     @Transactional
     public void deleteConversation(Long conversationId) {
         conversationRepository.deleteById(conversationId);
+    }
+
+    /**
+     * Build the complete system prompt by appending the current timestamp.
+     *
+     * @param basePrompt The base system prompt from context (can be empty)
+     * @return The complete system prompt with timestamp
+     */
+    private String buildSystemPromptWithTimestamp(String basePrompt) {
+        // Format current date and time
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy 'at' h:mm:ss a");
+        String timestamp = now.format(formatter);
+
+        // Build the timestamp message
+        String timestampInfo = "\n\nCurrent local date and time: " + timestamp;
+
+        // Append timestamp to base prompt
+        if (basePrompt != null && !basePrompt.trim().isEmpty()) {
+            return basePrompt.trim() + timestampInfo;
+        } else {
+            // If no base prompt, just return the timestamp info (without leading newlines)
+            return "Current local date and time: " + timestamp;
+        }
     }
 }

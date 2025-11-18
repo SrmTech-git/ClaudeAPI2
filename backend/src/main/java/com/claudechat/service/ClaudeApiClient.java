@@ -67,15 +67,24 @@ public class ClaudeApiClient {
         requestBody.put("messages", messages);
 
         // Enable extended thinking
+        // Note: budget_tokens must be >= 1024 and < max_tokens
         Map<String, Object> thinkingConfig = new HashMap<>();
         thinkingConfig.put("type", "enabled");
-        thinkingConfig.put("budget_tokens", 10000); // Allow up to 10k tokens for thinking
+        thinkingConfig.put("budget_tokens", Math.min(3000, maxTokens - 1000)); // Safe buffer below max_tokens
         requestBody.put("thinking", thinkingConfig);
 
         // Make the API call
         ClaudeApiResponse response = webClient.post()
                 .bodyValue(requestBody)
                 .retrieve()
+                .onStatus(
+                        status -> status.is4xxClientError() || status.is5xxServerError(),
+                        clientResponse -> clientResponse.bodyToMono(String.class)
+                                .map(body -> {
+                                    System.err.println("API Error Response: " + body);
+                                    return new RuntimeException("API Error: " + body);
+                                })
+                )
                 .bodyToMono(ClaudeApiResponse.class)
                 .block(); // Block to wait for response (synchronous call)
 

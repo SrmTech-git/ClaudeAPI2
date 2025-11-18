@@ -53,4 +53,23 @@ export const deleteConversation = async (conversationId) => {
   await api.delete(`/conversations/${conversationId}`);
 };
 
+/**
+ * Get the current context/system prompt.
+ * @returns {Promise} - The current context
+ */
+export const getContext = async () => {
+  const response = await api.get('/context');
+  return response.data;
+};
+
+/**
+ * Update the context/system prompt.
+ * @param {string} systemPrompt - The new system prompt
+ * @returns {Promise} - The updated context
+ */
+export const updateContext = async (systemPrompt) => {
+  const response = await api.put('/context', { systemPrompt });
+  return response.data;
+};
+
 export default api;

@@ -46,9 +46,10 @@ public class ClaudeApiClient {
      *
      * @param conversationHistory List of previous messages for context
      * @param userMessage The new message from the user
+     * @param systemPrompt Optional system prompt to guide Claude's behavior
      * @return Claude's response including thinking blocks and token usage
      */
-    public ClaudeResponse sendMessage(List<ConversationMessage> conversationHistory, String userMessage) {
+    public ClaudeResponse sendMessage(List<ConversationMessage> conversationHistory, String userMessage, String systemPrompt) {
         // Build the messages array
         List<Map<String, Object>> messages = new ArrayList<>();
 
@@ -65,6 +66,11 @@ public class ClaudeApiClient {
         requestBody.put("model", model);
         requestBody.put("max_tokens", maxTokens);
         requestBody.put("messages", messages);
+
+        // Add system prompt if provided
+        if (systemPrompt != null && !systemPrompt.trim().isEmpty()) {
+            requestBody.put("system", systemPrompt.trim());
+        }
 
         // Enable extended thinking
         // Note: budget_tokens must be >= 1024 and < max_tokens

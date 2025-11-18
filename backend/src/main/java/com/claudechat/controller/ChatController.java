@@ -3,8 +3,11 @@ package com.claudechat.controller;
 import com.claudechat.dto.ChatRequest;
 import com.claudechat.dto.ChatResponse;
 import com.claudechat.dto.ConversationDTO;
+import com.claudechat.dto.ContextDTO;
 import com.claudechat.model.Conversation;
+import com.claudechat.model.Context;
 import com.claudechat.service.ChatService;
+import com.claudechat.repository.ContextRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +23,11 @@ import java.util.stream.Collectors;
 public class ChatController {
 
     private final ChatService chatService;
+    private final ContextRepository contextRepository;
 
-    public ChatController(ChatService chatService) {
+    public ChatController(ChatService chatService, ContextRepository contextRepository) {
         this.chatService = chatService;
+        this.contextRepository = contextRepository;
     }
 
     /**
@@ -100,6 +105,45 @@ public class ChatController {
         try {
             chatService.deleteConversation(id);
             return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Get the current context/system prompt.
+     * GET /api/context
+     *
+     * @return The current context
+     */
+    @GetMapping("/context")
+    public ResponseEntity<ContextDTO> getContext() {
+        try {
+            Context context = contextRepository.findFirstByOrderByIdAsc()
+                    .orElse(new Context(""));
+            return ResponseEntity.ok(ContextDTO.fromEntity(context));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Update the context/system prompt.
+     * PUT /api/context
+     *
+     * @param contextDTO The new context
+     * @return The updated context
+     */
+    @PutMapping("/context")
+    public ResponseEntity<ContextDTO> updateContext(@RequestBody ContextDTO contextDTO) {
+        try {
+            Context context = contextRepository.findFirstByOrderByIdAsc()
+                    .orElse(new Context());
+            context.setSystemPrompt(contextDTO.getSystemPrompt());
+            context = contextRepository.save(context);
+            return ResponseEntity.ok(ContextDTO.fromEntity(context));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();

@@ -1,0 +1,36 @@
+# Compiled class files
+*.class
+target/
+*.jar
+*.war
+*.ear
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# CRITICAL: API Keys and Secrets - NEVER COMMIT
+src/main/resources/application-secrets.properties
+*secrets*
+*.env
+.env
+
+# Spring Boot
+HELP.md

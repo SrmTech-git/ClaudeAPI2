@@ -2,8 +2,10 @@ package com.claudechat.service;
 
 import com.claudechat.dto.ChatResponse;
 import com.claudechat.model.Conversation;
+import com.claudechat.model.Context;
 import com.claudechat.model.Message;
 import com.claudechat.repository.ConversationRepository;
+import com.claudechat.repository.ContextRepository;
 import com.claudechat.repository.MessageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,13 +22,16 @@ public class ChatService {
 
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
+    private final ContextRepository contextRepository;
     private final ClaudeApiClient claudeApiClient;
 
     public ChatService(ConversationRepository conversationRepository,
                       MessageRepository messageRepository,
+                      ContextRepository contextRepository,
                       ClaudeApiClient claudeApiClient) {
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
+        this.contextRepository = contextRepository;
         this.claudeApiClient = claudeApiClient;
     }
 
@@ -63,8 +68,13 @@ public class ChatService {
             }
         }
 
-        // Call Claude API
-        ClaudeApiClient.ClaudeResponse claudeResponse = claudeApiClient.sendMessage(history, userMessage);
+        // Get the system prompt from context
+        String systemPrompt = contextRepository.findFirstByOrderByIdAsc()
+                .map(Context::getSystemPrompt)
+                .orElse("");
+
+        // Call Claude API with system prompt
+        ClaudeApiClient.ClaudeResponse claudeResponse = claudeApiClient.sendMessage(history, userMessage, systemPrompt);
 
         // Save Claude's response
         Message assistantMsg = new Message("assistant", claudeResponse.content);

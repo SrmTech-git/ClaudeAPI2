@@ -19,3 +19,7 @@ logs/
 # Environment variables
 .env
 .env.local
+
+# Local helper scripts
+*.bat
+start-postgres.bat
